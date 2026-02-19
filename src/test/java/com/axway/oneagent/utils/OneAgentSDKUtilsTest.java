@@ -16,10 +16,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Trace.class, CorrelationID.class})
-@SuppressStaticInitializationFor({"com.vordel.trace.Trace", "com.vordel.dwe.CorrelationID"})
+@PrepareForTest({ Trace.class, CorrelationID.class })
+@SuppressStaticInitializationFor({ "com.vordel.trace.Trace", "com.vordel.dwe.CorrelationID",
+        "com.axway.oneagent.utils.OneAgentSDKUtils" })
 public class OneAgentSDKUtilsTest {
-
 
     @Test
     public void readHostNameFromHttpHeader() {
@@ -68,7 +68,7 @@ public class OneAgentSDKUtilsTest {
         HeaderSet headerSet = new HeaderSet();
         headerSet.addHeader("Host", "10.129.61.129");
         headerSet.addHeader(OneAgentSDK.DYNATRACE_HTTP_HEADERNAME, "FW123");
-        if(headerSet.containsKey(OneAgentSDK.DYNATRACE_HTTP_HEADERNAME)) {
+        if (headerSet.containsKey(OneAgentSDK.DYNATRACE_HTTP_HEADERNAME)) {
             headerSet.remove(OneAgentSDK.DYNATRACE_HTTP_HEADERNAME);
         }
         headerSet.addHeader(OneAgentSDK.DYNATRACE_HTTP_HEADERNAME, "FW12356");
@@ -77,7 +77,7 @@ public class OneAgentSDKUtilsTest {
     }
 
     @Test
-    public void testResponseCode(){
+    public void testResponseCode() {
         Message message = new Message(PowerMockito.mock(CorrelationID.class), null);
         message.put("http.response.status", 200);
         Assert.assertEquals(OneAgentSDKUtils.getHTTPStatusCode(message), 200);
