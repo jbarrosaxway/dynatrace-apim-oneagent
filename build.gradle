@@ -54,7 +54,7 @@ dependencies {
 }
 
 // Suppress AspectJ warning "adviceDidNotMatch" as weaving happens at runtime (LTW)
-tasks.withType(com.freefair.gradle.plugins.aspectj.AjcAction) {
+tasks.withType(io.freefair.gradle.plugins.aspectj.AjcAction) {
     options.compilerArgs += ["-Xlint:ignore"]
 }
 
