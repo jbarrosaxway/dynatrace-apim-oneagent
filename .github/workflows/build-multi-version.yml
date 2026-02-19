@@ -8,6 +8,7 @@ on:
       - 'build.gradle'
       - 'gradle/**'
       - 'axway-versions.json'
+      - '.github/workflows/**'
   pull_request:
     branches: [ master, main, develop ]
   workflow_dispatch:
