@@ -20,7 +20,25 @@ tasks.withType(JavaCompile) {
     options.compilerArgs += ['-Xlint:deprecation']
 }
 
-def apim_folder = '/Users/rnatarajan/v7apim/may2024/system'
+// Dynamic configuration of Axway API Gateway
+def axway_base = System.getProperty('axway.base', '/opt/Axway/API_Gateway_7.7.0')
+def apim_folder = "${axway_base}/apigateway/system"
+
+// Detect Axway version for logic (if needed in future)
+def axway_gateway_version = System.getProperty('axway.gateway.version', 'auto')
+
+if (file('/workspace').exists()) {
+    // Docker environment
+   def docker_axway_base = System.getProperty('axway.base', '/opt/Axway')
+   if (file("${docker_axway_base}/apigateway/system").exists()) {
+       axway_base = docker_axway_base
+       apim_folder = "${axway_base}/apigateway/system"
+   }
+}
+
+println "🔧 Axway Base: ${axway_base}"
+println "🔧 APIM Folder: ${apim_folder}"
+
 
 
 dependencies {
