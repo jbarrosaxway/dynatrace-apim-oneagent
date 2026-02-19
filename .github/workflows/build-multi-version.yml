@@ -176,17 +176,26 @@ jobs:
             if ! git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
                 git tag "$TAG_NAME"
                 git push origin "$TAG_NAME"
+            fi
+
+            # Create release with JARs (or update if exists)
+            echo "🚀 Creating/Updating release with artifacts..."
+            echo "Release $TAG_NAME" > .release_notes
+            
+            # Try to create release. If it fails (e.g. exists), try to upload to it.
+            if ! gh release create "$TAG_NAME" \
+              --title "Dynatrace OneAgent SDK v$RELEASE_VERSION" \
+              --notes-file .release_notes \
+              dynatrace-aspectj-*.jar \
+              dynatrace-oneagent-*.zip \
+              --repo "$GITHUB_REPOSITORY"; then
                 
-                 # Create release with JARs
-                echo "🚀 Creating release with JARs..."
-                echo "Release $TAG_NAME" > .release_notes
-                
-                gh release create "$TAG_NAME" \
-                  --title "Dynatrace OneAgent SDK v$RELEASE_VERSION" \
-                  --notes-file .release_notes \
+                echo "⚠️ Release creation failed (likely exists), attempting to upload assets..."
+                gh release upload "$TAG_NAME" \
                   dynatrace-aspectj-*.jar \
                   dynatrace-oneagent-*.zip \
-                  --repo "$GITHUB_REPOSITORY" || echo "Release already exists or failed to create"
+                  --clobber \
+                  --repo "$GITHUB_REPOSITORY"
             fi
         fi
         
