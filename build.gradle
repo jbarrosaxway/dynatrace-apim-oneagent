@@ -52,6 +52,32 @@ dependencies {
     testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
     testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
 }
-jar{
+
+// Suppress AspectJ warning "adviceDidNotMatch" as weaving happens at runtime (LTW)
+tasks.withType(com.freefair.gradle.plugins.aspectj.AjcAction) {
+    options.compilerArgs += ["-Xlint:ignore"]
+}
+
+jar {
     metaInf {from('src/main/resources/aop.xml')}
 }
+
+// Task to collect dependencies for the release
+task copyDependencies(type: Copy) {
+    from configurations.runtimeClasspath
+    include 'oneagent-sdk-*.jar'
+    include 'aspectjweaver-*.jar'
+    into "${buildDir}/deps"
+}
+
+// Task to create the release ZIP
+task distZip(type: Zip) {
+    dependsOn jar, copyDependencies
+    archiveFileName = "dynatrace-oneagent-${project.version}.zip"
+    destinationDirectory = file("${buildDir}/distributions")
+
+    from jar.archiveFile
+    from "${buildDir}/deps"
+}
+
+build.dependsOn distZip

@@ -124,11 +124,12 @@ jobs:
             -v "$(pwd):/workspace" \
             -w /workspace \
             "$DOCKER_IMAGE" \
-            ./gradlew -Daxway.base="$BASE_PATH" clean build
+            ./gradlew -Daxway.base="$BASE_PATH" clean build distZip
           
           # Check result
           # Project name is dynatrace-aspectj based on settings.gradle
           JAR_FILE=$(find build/libs -name "dynatrace-aspectj-*.jar" | head -1)
+          ZIP_FILE=$(find build/distributions -name "dynatrace-oneagent-*.zip" | head -1)
           
           if [ -n "$JAR_FILE" ]; then
             echo "✅ JAR created for $VERSION: $JAR_FILE"
@@ -142,6 +143,17 @@ jobs:
             echo "📁 Content of build/libs:"
             ls -la build/libs/ || echo "Directory build/libs does not exist"
             exit 1
+          fi
+
+          if [ -n "$ZIP_FILE" ]; then
+            echo "✅ ZIP created for $VERSION: $ZIP_FILE"
+            ls -la "$ZIP_FILE"
+            
+            # Copy ZIP to current directory with Gateway version suffix
+            cp "$ZIP_FILE" "./dynatrace-oneagent-$RELEASE_VERSION-$VERSION.zip"
+            echo "✅ ZIP copied: dynatrace-oneagent-$RELEASE_VERSION-$VERSION.zip"
+          else
+             echo "⚠️ ZIP not found for $VERSION"
           fi
           
           # Clean up Docker image to save disk space
@@ -173,14 +185,16 @@ jobs:
                   --title "Dynatrace OneAgent SDK v$RELEASE_VERSION" \
                   --notes-file .release_notes \
                   dynatrace-aspectj-*.jar \
+                  dynatrace-oneagent-*.zip \
                   --repo "$GITHUB_REPOSITORY" || echo "Release already exists or failed to create"
             fi
         fi
         
-    - name: Upload JARs as artifacts
+    - name: Upload JARs and ZIPs as artifacts
       uses: actions/upload-artifact@v4
       with:
         name: dynatrace-aspectj-artifacts
         path: |
           dynatrace-aspectj-*.jar
+          dynatrace-oneagent-*.zip
         retention-days: 30
